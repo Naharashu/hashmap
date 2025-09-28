@@ -1,9 +1,8 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "map.h"
+
 
 #ifndef TABLE_SIZE
-#define TABLE_SIZE 1024
+#define TABLE_SIZE 233232
 #endif
 
 /*
@@ -12,32 +11,35 @@
    MIT LICENSE
 */
 
-typedef struct Entry {
-	char *key;
-	int value;
-	struct Entry *next;
-} Entry;
 
 Entry* table[TABLE_SIZE] = {0};
 
-int hash(char *str) {
-	int i = 0;
-	int len = strlen(str);
-	for(int j = 0; j < len; j++) {
-		i = str[j] + (i << 6) + (i << 16) - i;
+
+static inline int hash(char *str) {
+	register unsigned int i = 2166136261u;
+	while(*str) {
+		i ^= (unsigned char)(*str++);
+		i *= 16777619u;
 	}
 	return i;
 }
 
-int indx(char *str) {
+static inline int indx(char *str) {
 	int a = (unsigned int)(hash(str)) % TABLE_SIZE;
 	return a;
 }
 
 void set(char *varname, int val) {
 	int i = indx(varname);
+	Entry* a = table[i];
+	while(a) {
+		if(__builtin_expect(strcmp(a->key, varname)==0, 0)) {
+			a->value = val;
+		}
+		a = a->next;
+	}
 	Entry* e = malloc(sizeof(Entry));
-	e->key = varname;
+	e->key = strdup(varname);
 	e->value = val;
 	e->next = table[i];
 	table[i] = e;
@@ -67,45 +69,3 @@ void free_table() {
 		table[i] = NULL;
 	}
 }
-
-
-/*
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <string.h>
-
-// включаємо твою хеш-таблицю тут
-
-int main() {
-    const int N = 100000; // кількість ключів
-    char key[20];
-    clock_t start, end;
-
-    // Вставка
-    start = clock();
-    for(int i = 0; i < N; i++) {
-        sprintf(key, "key%d", i);
-        set(key, i);
-    }
-    end = clock();
-    printf("Insertion of %d keys took %.3f seconds\n", N, (double)(end - start)/CLOCKS_PER_SEC);
-
-    // Пошук
-    start = clock();
-    for(int i = 0; i < N; i++) {
-        sprintf(key, "key%d", i);
-        int val = get(key);
-        if(val != i) {
-            printf("Error at key %d\n", i);
-        }
-    }
-    end = clock();
-    printf("Lookup of %d keys took %.3f seconds\n", N, (double)(end - start)/CLOCKS_PER_SEC);
-
-    free_table();
-    return 0;
-}
-
-*/
