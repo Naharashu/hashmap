@@ -1,13 +1,12 @@
 #include "map.h"
 
-
 #ifndef TABLE_SIZE
-#define TABLE_SIZE 233232
+#define TABLE_SIZE 100000
 #endif
 
 /*
    Hashmap by Naharashu
-   Version 1.1
+   Version 1.2
    MIT LICENSE
 */
 
@@ -16,17 +15,17 @@ Entry* table[TABLE_SIZE] = {0};
 
 
 static inline int hash(char *str) {
-	register unsigned int i = 2166136261u;
-	while(*str) {
-		i ^= (unsigned char)(*str++);
-		i *= 16777619u;
+	register unsigned int i=0;
+	int len = strlen(str);
+	for(int j = 0; j<len;j++) {
+		// i = str[j] + (i << 6) + (i << 16) - i;
+		i = str[j] + i * 65599;
 	}
 	return i;
 }
 
 static inline int indx(char *str) {
-	int a = (unsigned int)(hash(str)) % TABLE_SIZE;
-	return a;
+	return ((unsigned int)(hash(str)) % TABLE_SIZE);
 }
 
 void set(char *varname, int val) {
@@ -35,6 +34,7 @@ void set(char *varname, int val) {
 	while(a) {
 		if(__builtin_expect(strcmp(a->key, varname)==0, 0)) {
 			a->value = val;
+			return;
 		}
 		a = a->next;
 	}
