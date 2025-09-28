@@ -6,6 +6,12 @@
 #define TABLE_SIZE 1024
 #endif
 
+/*
+   Hashmap by Naharashu
+   Version 1.1
+   MIT LICENSE
+*/
+
 typedef struct Entry {
 	char *key;
 	int value;
@@ -16,8 +22,9 @@ Entry* table[TABLE_SIZE] = {0};
 
 int hash(char *str) {
 	int i = 0;
-	for(int j = 0; j < strlen(str); j++) {
-		i = str[j] + (i << 6) + (i << 6) - i;
+	int len = strlen(str);
+	for(int j = 0; j < len; j++) {
+		i = str[j] + (i << 6) + (i << 16) - i;
 	}
 	return i;
 }
@@ -37,7 +44,13 @@ void set(char *varname, int val) {
 }
 
 int get(char *name) {
-	return table[indx(name)]->value;
+	int i = indx(name);
+	Entry* e = table[i];
+	while(e) {
+		if(strcmp(e->key, name) == 0) {
+			return e->value;
+		}
+		e = e->next;
+	}
+	return -1;
 }
-
-
