@@ -1,77 +1,11 @@
-Error at key 89659
-Error at key 89668
-Error at key 89669
-Error at key 89678
-Error at key 89679
-Error at key 89688
-Error at key 89689
-Error at key 89698
-Error at key 89699
-Lookup of 100000 keys took 0.335 seconds
-free(): invalid pointer
-Перервано
-danilo@home:~/projects/map$ cat main.c
-#include <time.h>
-#include "map.h"
-
-// включаємо твою хеш-таблицю тут
-
-int main() {
-    const int N = 100000; // кількість ключів
-    char key[20];
-    clock_t start, end;
-
-    // Вставка
-    start = clock();
-    for(int i = 0; i < N; i++) {
-        sprintf(key, "key%d", i);
-        set(key, i);
-    }
-    end = clock();
-    printf("Insertion of %d keys took %.3f seconds\n", N, (double)(end - start)/CLOCKS_PER_SEC);
-
-    // Пошук
-    start = clock();
-    for(int i = 0; i < N; i++) {
-        sprintf(key, "key%d", i);
-        int val = get(key);
-        if(val != i) {
-            printf("Error at key %d\n", i);
-        }
-    }
-    end = clock();
-    printf("Lookup of %d keys took %.3f seconds\n", N, (double)(end - start)/CLOCKS_PER_SEC);
-
-    free_table();
-    return 0;
-}
-danilo@home:~/projects/map$ cat map.h
-#ifndef HASHMAP_H
-#define HASHMAP_H
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-
-typedef struct Entry {
-	char *key;
-	int value;
-	struct Entry *next;
-} Entry;
-
-int hash(char* str);
-int indx(char* str);
-void set(char* varname, int val);
-int get(char *name);
-void free_table();
-
-#endif
+danilo@home:~/projects/map$ ./main
+Помилка адресування
 danilo@home:~/projects/map$ cat map.c
 #include "map.h"
 
 
 #ifndef TABLE_SIZE
-#define TABLE_SIZE 100000
+#define TABLE_SIZE 131071
 #endif
 
 /*
@@ -82,6 +16,7 @@ danilo@home:~/projects/map$ cat map.c
 
 
 Entry* table[TABLE_SIZE] = {0};
+
 
 int hash(char *str) {
 	int i = 0;
@@ -99,8 +34,13 @@ int indx(char *str) {
 
 void set(char *varname, int val) {
 	int i = indx(varname);
+	Entry* a = table[i];
+	if(strcmp(a->key, "") != 0) {
+		a->value = val;
+		return;
+	}
 	Entry* e = malloc(sizeof(Entry));
-	e->key = varname;
+	e->key = strdup(varname);
 	e->value = val;
 	e->next = table[i];
 	table[i] = e;
@@ -130,3 +70,4 @@ void free_table() {
 		table[i] = NULL;
 	}
 }
+
