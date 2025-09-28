@@ -30,7 +30,7 @@ int hash(char *str) {
 }
 
 int indx(char *str) {
-	int a = hash(str) % TABLE_SIZE;
+	int a = (unsigned int)(hash(str)) % TABLE_SIZE;
 	return a;
 }
 
@@ -53,4 +53,17 @@ int get(char *name) {
 		e = e->next;
 	}
 	return -1;
+}
+
+void free_table() {
+	for(int i = 0; i < TABLE_SIZE; i++) {
+		Entry* e = table[i];
+		while(e) {
+			Entry* next = e->next;
+			free(e->key);
+			free(e);
+			e = next;
+		}
+		table[i] = NULL;
+	}
 }
