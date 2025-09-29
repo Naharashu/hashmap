@@ -1,17 +1,23 @@
 #include "map.h"
 
-#ifndef TABLE_SIZE
-#define TABLE_SIZE 100000
-#endif
+long long TABLE_SIZE = 100000;
+
+//#define NON_STATIC
+
+long long taken = 0;
 
 /*
    Hashmap by Naharashu
-   Version 1.2
+   Version 1.3
    MIT LICENSE
 */
 
 
-Entry* table[TABLE_SIZE] = {0};
+Entry** table;
+
+void init_map(long long size) {
+	table = calloc(TABLE_SIZE, sizeof(Entry*));
+}
 
 
 static inline int hash(char *str) {
@@ -38,10 +44,14 @@ void set(char *varname, int val) {
 		}
 		a = a->next;
 	}
+	#ifdef NON_STATIC
+		update_map_size();
+	#endif
 	Entry* e = malloc(sizeof(Entry));
 	e->key = strdup(varname);
 	e->value = val;
 	e->next = table[i];
+	taken++;
 	table[i] = e;
 }
 
@@ -67,5 +77,29 @@ void free_table() {
 			e = next;
 		}
 		table[i] = NULL;
+		taken--;
 	}
+}
+
+
+long long rescale_map(long long size) {
+	Entry** tmp = realloc(table, size*sizeof(Entry*));
+	if(!tmp) {
+		free_table();
+		return 0;
+	}
+	table = tmp;
+	return size;
+}
+
+void update_map_size() {
+    long long new_size = TABLE_SIZE;  
+    if (taken > (TABLE_SIZE * 0.75)) {
+        new_size = (long long)(TABLE_SIZE * 1.25); 
+        new_size = rescale_map(new_size);  
+        if (new_size != 0) {  
+            memset(table + TABLE_SIZE, 0, (new_size - TABLE_SIZE) * sizeof(Entry*));  // Правильне використання таблиці
+        }
+    }
+    TABLE_SIZE = new_size;  
 }
