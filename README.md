@@ -9,3 +9,8 @@ Avarage insertion time (per 100,000 keys): 0,043 seconds // tested on MediaTek G
 
 Avarage lookup time (per 100,000 keys): 0.025 seconds // tested on MediaTek G85
 
+Avarage insertion time (per 100,000 keys): 0,031 seconds // tested on Intel i3-3120M
+
+Avarage lookup time (per 100,000 keys): 0.015 seconds // tested on Intel i3-3120M
+
+
