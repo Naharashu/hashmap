@@ -17,6 +17,16 @@ Avarage lookup time (per 100,000 keys): 0.016 seconds // tested on Intel i3-3120
 
 ### Version 1.4:
 
+Insertion:
 
+Avarage insertion time (per 100,000 keys): 0,036 seconds // tested on Intel i3-3120M with static table
+
+Avarage insertion time (per 100,000 keys): 0,053 seconds // tested on Intel i3-3120M with non-static table
+
+Lookup:
+
+Avarage lookup time (per 100,000 keys): 0,019 seconds // tested on Intel i3-3120M with static table
+
+Avarage lookup time (per 100,000 keys): 0,020 seconds // tested on Intel i3-3120M with non-static table
 
 
