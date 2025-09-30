@@ -1,17 +1,23 @@
 #include "map.h"
 
-#ifndef TABLE_SIZE
-#define TABLE_SIZE 100000
-#endif
+long long TABLE_SIZE = 100000;
+
+//#define NON_STATIC
+
+long long taken = 0;
 
 /*
    Hashmap by Naharashu
-   Version 1.2
+   Version 1.3
    MIT LICENSE
 */
 
 
-Entry* table[TABLE_SIZE] = {0};
+Entry** table;
+
+void init_map(long long size) {
+	table = calloc(TABLE_SIZE, sizeof(Entry*));
+}
 
 
 static inline int hash(char *str) {
@@ -38,10 +44,14 @@ void set(char *varname, int val) {
 		}
 		a = a->next;
 	}
+	#ifdef NON_STATIC
+		update_map_size();
+	#endif
 	Entry* e = malloc(sizeof(Entry));
 	e->key = strdup(varname);
 	e->value = val;
 	e->next = table[i];
+	taken++;
 	table[i] = e;
 }
 
@@ -67,5 +77,46 @@ void free_table() {
 			e = next;
 		}
 		table[i] = NULL;
+		taken--;
 	}
+}
+
+
+long long rescale_map(long long size) {
+	Entry** tmp = realloc(table, size*sizeof(Entry*));
+	if(!tmp) {
+		free_table();
+		return 0;
+	}
+	table = tmp;
+	return size;
+}
+
+void update_map_size() {
+    if (taken <= (TABLE_SIZE * 0.75)) return;
+
+    long long old_size = TABLE_SIZE;
+    long long new_size = (long long)(TABLE_SIZE * 1.25);
+
+    Entry** new_table = calloc(new_size, sizeof(Entry*));
+    if (!new_table) {
+        return;
+    }
+
+    for (long long i = 0; i < old_size; i++) {
+        Entry* e = table[i];
+        while (e) {
+            Entry* next = e->next;
+
+            int new_index = ((unsigned int)(hash(e->key)) % new_size);
+            e->next = new_table[new_index];
+            new_table[new_index] = e;
+
+            e = next;
+        }
+    }
+
+    free(table); 
+    table = new_table;
+    TABLE_SIZE = new_size;
 }
